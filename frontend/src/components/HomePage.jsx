@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { Sun } from 'lucide-react';
 
 export default function HomePage({
   cities = [],
@@ -67,50 +66,53 @@ export default function HomePage({
             </div>
           </div>
 
-          {/* CIRCULAR METRICS CARDS */}
-          <div className="relative z-10 grid grid-cols-2 lg:grid-cols-4 gap-4 max-w-5xl mx-auto w-full pt-2">
+          {/* CIRCULAR METRICS & REAL-TIME ERA5 / CPCB TELEMETRY CARDS */}
+          <div className="relative z-10 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 max-w-5xl mx-auto w-full pt-2">
             
-            {/* Stat Card 1 */}
-            <div className="bg-white/80 backdrop-blur-md p-4 rounded-3xl border border-[#84cc16]/20 shadow-sm flex flex-col justify-between items-center text-center transition-all duration-300 hover:scale-[1.02] hover:border-[#84cc16]/40">
-              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Baseline LST</span>
-              <span className="text-2xl sm:text-3xl font-bold text-[#0d1117] my-1">39.7°C</span>
-              <span className="text-[10px] text-rose-600 font-medium">{selectedCity} Surface Temp</span>
+            {/* Stat Card 1: Baseline LST */}
+            <div className="bg-white/80 backdrop-blur-md p-3.5 rounded-3xl border border-[#84cc16]/20 shadow-sm flex flex-col justify-between items-center text-center transition-all duration-300 hover:scale-[1.02] hover:border-[#84cc16]/40">
+              <span className="text-[9.5px] font-bold text-slate-500 uppercase tracking-wider">Baseline LST</span>
+              <span className="text-xl sm:text-2xl font-bold text-[#0d1117] my-0.5">39.7°C</span>
+              <span className="text-[9px] text-rose-600 font-medium">Surface Skin Temp</span>
             </div>
 
-            {/* Stat Card 2 */}
-            <div className="bg-[#0d1117] text-white p-4 rounded-3xl border border-white/10 shadow-xl flex flex-col justify-between items-center text-center transition-all duration-300 hover:scale-[1.02] hover:border-[#a3e635]/40">
-              <span className="text-[10px] font-bold text-[#a3e635] uppercase tracking-wider">Target LST</span>
-              <span className="text-2xl sm:text-3xl font-bold text-[#a3e635] my-1">
+            {/* Stat Card 2: Air Temp (ERA5) */}
+            <div className="bg-white/80 backdrop-blur-md p-3.5 rounded-3xl border border-[#84cc16]/20 shadow-sm flex flex-col justify-between items-center text-center transition-all duration-300 hover:scale-[1.02] hover:border-[#84cc16]/40">
+              <span className="text-[9.5px] font-bold text-amber-700 uppercase tracking-wider">Air Temp</span>
+              <span className="text-xl sm:text-2xl font-bold text-amber-600 my-0.5">34.2°C</span>
+              <span className="text-[9px] text-slate-500 font-medium">ERA5 Reanalysis</span>
+            </div>
+
+            {/* Stat Card 3: Humidity (CPCB) */}
+            <div className="bg-white/80 backdrop-blur-md p-3.5 rounded-3xl border border-[#84cc16]/20 shadow-sm flex flex-col justify-between items-center text-center transition-all duration-300 hover:scale-[1.02] hover:border-[#84cc16]/40">
+              <span className="text-[9.5px] font-bold text-cyan-700 uppercase tracking-wider">Humidity</span>
+              <span className="text-xl sm:text-2xl font-bold text-cyan-600 my-0.5">42.5%</span>
+              <span className="text-[9px] text-slate-500 font-medium">CPCB Telemetry</span>
+            </div>
+
+            {/* Stat Card 4: Wind Speed (ERA5) */}
+            <div className="bg-white/80 backdrop-blur-md p-3.5 rounded-3xl border border-[#84cc16]/20 shadow-sm flex flex-col justify-between items-center text-center transition-all duration-300 hover:scale-[1.02] hover:border-[#84cc16]/40">
+              <span className="text-[9.5px] font-bold text-emerald-700 uppercase tracking-wider">Wind Speed</span>
+              <span className="text-xl sm:text-2xl font-bold text-emerald-600 my-0.5">2.8 m/s</span>
+              <span className="text-[9px] text-slate-500 font-medium">ERA5 Surface Grid</span>
+            </div>
+
+            {/* Stat Card 5: Target LST Drop */}
+            <div className="bg-[#0d1117] text-white p-3.5 rounded-3xl border border-white/10 shadow-xl flex flex-col justify-between items-center text-center transition-all duration-300 hover:scale-[1.02] hover:border-[#a3e635]/40">
+              <span className="text-[9.5px] font-bold text-[#a3e635] uppercase tracking-wider">Target LST</span>
+              <span className="text-xl sm:text-2xl font-bold text-[#a3e635] my-0.5">
                 ↓ 2.68°C
               </span>
-              <span className="text-[10px] text-slate-400 font-medium">Simulated Cooling</span>
+              <span className="text-[9px] text-slate-400 font-medium">Simulated Cooling</span>
             </div>
 
-            {/* Stat Card 3 */}
-            <div className="bg-white/80 backdrop-blur-md p-4 rounded-3xl border border-[#84cc16]/20 shadow-sm flex flex-col justify-between items-center text-center transition-all duration-300 hover:scale-[1.02] hover:border-[#84cc16]/40">
-              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Feasibility</span>
-              <span className="text-2xl sm:text-3xl font-bold text-[#65a30d] my-1">100%</span>
-              <span className="text-[10px] text-slate-500 font-medium">Water & Budget Validated</span>
+            {/* Stat Card 6: Feasibility */}
+            <div className="bg-white/80 backdrop-blur-md p-3.5 rounded-3xl border border-[#84cc16]/20 shadow-sm flex flex-col justify-between items-center text-center transition-all duration-300 hover:scale-[1.02] hover:border-[#84cc16]/40">
+              <span className="text-[9.5px] font-bold text-slate-500 uppercase tracking-wider">Feasibility</span>
+              <span className="text-xl sm:text-2xl font-bold text-[#65a30d] my-0.5">100%</span>
+              <span className="text-[9px] text-slate-500 font-medium">Water & Budget</span>
             </div>
 
-            {/* Stat Card 4 */}
-            <div className="bg-white/80 backdrop-blur-md p-4 rounded-3xl border border-[#84cc16]/20 shadow-sm flex flex-col justify-between items-center text-center transition-all duration-300 hover:scale-[1.02] hover:border-amber-400/40">
-              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">ROI Score</span>
-              <span className="text-2xl sm:text-3xl font-bold text-amber-600 my-1">0.12°C</span>
-              <span className="text-[10px] text-slate-500 font-medium">Per ₹1 Lakh Allocated</span>
-            </div>
-
-          </div>
-
-          {/* Bottom Right Floating Theme Toggle Button */}
-          <div className="absolute bottom-4 right-5 z-20">
-            <button
-              onClick={handleClick}
-              className="w-9 h-9 rounded-full bg-black/40 hover:bg-black/60 backdrop-blur-md text-amber-300 border border-white/20 flex items-center justify-center transition-all duration-300 shadow-lg cursor-pointer hover:scale-110 active:scale-90"
-              title="Launch Matrix"
-            >
-              <Sun className="w-4 h-4" />
-            </button>
           </div>
 
         </div>

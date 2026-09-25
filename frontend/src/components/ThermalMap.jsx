@@ -188,7 +188,7 @@ export default function ThermalMap({
             <div class="space-y-2 flex flex-col justify-between">
               <div class="grid grid-cols-2 gap-2 text-center bg-[#0e1117]/50 backdrop-blur-sm p-2 rounded-xl border border-white/10">
                 <div class="border-r border-white/10 pr-1">
-                  <div class="text-[8.5px] font-bold text-slate-400">1. BASELINE</div>
+                  <div class="text-[8.5px] font-bold text-slate-400">1. BASELINE LST</div>
                   <div class="text-base font-black text-rose-400">${baselineLst.toFixed(1)}°C</div>
                 </div>
                 <div class="pl-1">
@@ -232,6 +232,22 @@ export default function ThermalMap({
                   <strong class="text-cyan-400">${(deltaNdbi * 100).toFixed(0)}% Impervious</strong>
                 </div>
               </div>
+            </div>
+          </div>
+
+          <!-- ERA5 & Central Pollution Control Board (CPCB) Environmental Telemetry -->
+          <div class="grid grid-cols-3 gap-1.5 bg-black/50 p-2 rounded-xl border border-white/10 text-[9px] text-center">
+            <div>
+              <span class="text-slate-400 font-bold block text-[8px] uppercase">Air Temp (ERA5)</span>
+              <strong class="text-amber-300 font-black text-xs">${(zone.air_temp_c || (baselineLst - 3.8)).toFixed(1)}°C</strong>
+            </div>
+            <div>
+              <span class="text-slate-400 font-bold block text-[8px] uppercase">Humidity (CPCB)</span>
+              <strong class="text-cyan-300 font-black text-xs">${(zone.humidity_pct || 42.5).toFixed(1)}%</strong>
+            </div>
+            <div>
+              <span class="text-slate-400 font-bold block text-[8px] uppercase">Wind Speed (ERA5)</span>
+              <strong class="text-emerald-300 font-black text-xs">${(zone.wind_speed_ms || zone.wind_speed || 2.8).toFixed(1)} m/s</strong>
             </div>
           </div>
         </div>

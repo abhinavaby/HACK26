@@ -13,7 +13,7 @@ export default function Header({
     <header className="sticky top-0 z-50 w-full max-w-6xl mx-auto px-4 pt-2">
       {/* Circular Inverted Floating Dark Top Bar / Notch Header */}
       <div className="bg-[#000000] text-white px-6 py-3 rounded-b-[1.75rem] shadow-[0_20px_50px_rgba(0,0,0,0.8)] border border-white/10 flex items-center justify-between gap-4 transition-all duration-300">
-        
+
         {/* Brand Logo: ThermaGrid AI */}
         <button
           onClick={() => onNavigatePage && onNavigatePage('home')}
@@ -34,18 +34,16 @@ export default function Header({
         <div className="hidden md:flex items-center gap-6 text-xs font-semibold text-slate-300">
           <button
             onClick={() => onNavigatePage && onNavigatePage('home')}
-            className={`transition cursor-pointer ${
-              pageView === 'home' ? 'text-[#a3e635] font-bold' : 'hover:text-white'
-            }`}
+            className={`transition cursor-pointer ${pageView === 'home' ? 'text-[#a3e635] font-bold' : 'hover:text-white'
+              }`}
           >
             Home
           </button>
 
           <button
             onClick={() => onNavigatePage && onNavigatePage('dashboard')}
-            className={`transition cursor-pointer flex items-center gap-1.5 ${
-              pageView === 'dashboard' ? 'text-[#a3e635] font-bold' : 'hover:text-white'
-            }`}
+            className={`transition cursor-pointer flex items-center gap-1.5 ${pageView === 'dashboard' ? 'text-[#a3e635] font-bold' : 'hover:text-white'
+              }`}
           >
             <span>System Matrix</span>
             <span className="w-1.5 h-1.5 rounded-full bg-[#a3e635] animate-pulse" />
