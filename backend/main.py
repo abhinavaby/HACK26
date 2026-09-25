@@ -40,6 +40,15 @@ class SimulationRequest(BaseModel):
     delta_ndvi: float = 0.15
     delta_albedo: float = 0.20
     delta_ndbi: float = -0.10
+    user_budget_inr: Optional[float] = 2000000.0
+    user_water_lpd: Optional[float] = 6000.0
+
+
+class SpatialComparisonRequest(BaseModel):
+    city: Optional[str] = "Delhi"
+    delta_ndvi: float = 0.15
+    delta_albedo: float = 0.20
+    delta_ndbi: float = -0.10
 
 
 class AIChatRequest(BaseModel):
@@ -89,7 +98,9 @@ def simulate_intervention(req: SimulationRequest):
         zone_id=req.zone_id,
         delta_ndvi=req.delta_ndvi,
         delta_albedo=req.delta_albedo,
-        delta_ndbi=req.delta_ndbi
+        delta_ndbi=req.delta_ndbi,
+        user_budget_inr=req.user_budget_inr or 2000000.0,
+        user_water_lpd=req.user_water_lpd or 6000.0
     )
     return result
 
@@ -103,6 +114,77 @@ def get_roi_ranking(city: str = Query("Delhi"), limit: int = Query(10)):
         "count": len(rankings),
         "candidates": rankings
     }
+
+
+@app.get("/api/heat-history")
+def get_heat_history(
+    city: str = Query("Delhi"),
+    zone_id: Optional[str] = Query(None),
+    time_range: int = Query(10)
+):
+    engine = get_engine(city)
+    return engine.get_heat_history_trends(zone_id=zone_id, time_range_years=time_range)
+
+
+@app.get("/api/suitability")
+def get_intervention_suitability(
+    city: str = Query("Delhi"),
+    zone_id: str = Query(...)
+):
+    engine = get_engine(city)
+    return engine.check_intervention_suitability(zone_id=zone_id)
+
+
+@app.post("/api/spatial-comparison")
+def get_spatial_comparison(req: SpatialComparisonRequest):
+    engine = get_engine(req.city)
+    return engine.get_spatial_grid_comparison(
+        delta_ndvi=req.delta_ndvi,
+        delta_albedo=req.delta_albedo,
+        delta_ndbi=req.delta_ndbi
+    )
+
+
+@app.get("/api/intervention-locations")
+def get_intervention_locations(
+    city: str = Query("Delhi"),
+    delta_ndvi: float = Query(0.15),
+    delta_albedo: float = Query(0.20),
+    delta_ndbi: float = Query(-0.10),
+    user_budget_inr: float = Query(2000000.0),
+    user_water_lpd: float = Query(6000.0)
+):
+    engine = get_engine(city)
+    return engine.get_candidate_intervention_locations(
+        delta_ndvi=delta_ndvi,
+        delta_albedo=delta_albedo,
+        delta_ndbi=delta_ndbi,
+        user_budget_inr=user_budget_inr,
+        user_water_lpd=user_water_lpd
+    )
+
+
+@app.get("/api/priority-hotspots")
+def get_priority_hotspots(
+    city: str = Query("Delhi"),
+    weight_heat: float = Query(0.40),
+    weight_veg: float = Query(0.25),
+    weight_built: float = Query(0.20),
+    weight_opp: float = Query(0.15)
+):
+    engine = get_engine(city)
+    return engine.get_priority_hotspot_rankings(
+        weight_heat=weight_heat,
+        weight_veg=weight_veg,
+        weight_built=weight_built,
+        weight_opp=weight_opp
+    )
+
+
+@app.get("/api/transparency")
+def get_data_and_model_transparency(city: str = Query("Delhi")):
+    engine = get_engine(city)
+    return engine.get_data_and_model_transparency()
 
 
 @app.get("/api/scenarios")

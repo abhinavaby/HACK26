@@ -118,6 +118,20 @@ export default function AiCopilotDrawer({ city, selectedZoneId, simulationData }
   const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef(null);
 
+  // Listen for Copy Section Code & Ask AI event from map popups & tooltips
+  useEffect(() => {
+    const handleAskAiContext = (e) => {
+      const contextCode = e.detail;
+      setIsOpen(true);
+      setInputQuery(`Analyze this urban cooling intervention section code:\n\n${contextCode}\n\nWhat are the primary implementation risks, thermal benefits, and municipal ROI?`);
+    };
+
+    window.addEventListener('ask-ai-context', handleAskAiContext);
+    return () => {
+      window.removeEventListener('ask-ai-context', handleAskAiContext);
+    };
+  }, []);
+
   // Auto-scroll to bottom on new messages
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
