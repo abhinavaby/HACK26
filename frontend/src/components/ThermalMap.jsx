@@ -6,7 +6,8 @@ export default function ThermalMap({
   zones,
   center,
   selectedZoneId,
-  onSelectZone
+  onSelectZone,
+  hideHeader = false
 }) {
   const mapContainerRef = useRef(null);
   const mapInstanceRef = useRef(null);
@@ -106,47 +107,41 @@ export default function ThermalMap({
 
   }, [zones, selectedZoneId, onSelectZone]);
 
-  return (
-    <div className="glass-card p-3 sm:p-4 relative h-[340px] sm:h-[450px] flex flex-col rounded-xl overflow-hidden">
-      {/* Mobile-Friendly Header */}
-      <div className="flex flex-wrap items-center justify-between gap-2 mb-2.5 z-10">
-        <div className="flex items-center gap-2">
-          <Layers className="w-4 h-4 text-emerald-400" />
-          <h3 className="text-sm sm:text-base font-bold text-white">
-            Urban Heat Map
-          </h3>
-          <span className="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded font-medium">
-            Tap cell to select
-          </span>
-        </div>
-
-        {/* Controls & Legend */}
-        <div className="flex items-center gap-2">
-          <div className="flex items-center bg-slate-900/90 p-0.5 rounded-lg border border-slate-800 text-xs">
-            <button
-              onClick={() => setMapStyle('osm')}
-              className={`px-2 py-0.5 rounded text-[11px] font-semibold transition cursor-pointer ${
-                mapStyle === 'osm' ? 'bg-emerald-600 text-white' : 'text-slate-400 hover:text-white'
+  const mapCanvas = (
+    <div className="w-full flex-1 flex flex-col justify-between relative min-h-[380px]">
+      {/* Map Sub-Controls */}
+      <div className="flex items-center justify-between gap-2 mb-2 z-10">
+        <span className="text-[11px] text-slate-400 font-semibold">Tap grid cell to inspect temperature</span>
+        <div className="flex items-center bg-[#07080b] p-0.5 rounded-full border border-white/10 text-xs">
+          <button
+            onClick={() => setMapStyle('osm')}
+            className={`px-3 py-0.5 rounded-full text-[11px] font-bold transition cursor-pointer ${mapStyle === 'osm' ? 'bg-[#b5f639] text-[#07080b]' : 'text-slate-400 hover:text-white'
               }`}
-            >
-              OpenStreet
-            </button>
-            <button
-              onClick={() => setMapStyle('dark')}
-              className={`px-2 py-0.5 rounded text-[11px] font-semibold transition cursor-pointer ${
-                mapStyle === 'dark' ? 'bg-slate-700 text-white' : 'text-slate-400 hover:text-white'
+          >
+            OpenStreet
+          </button>
+          <button
+            onClick={() => setMapStyle('dark')}
+            className={`px-3 py-0.5 rounded-full text-[11px] font-bold transition cursor-pointer ${mapStyle === 'dark' ? 'bg-[#b5f639] text-[#07080b]' : 'text-slate-400 hover:text-white'
               }`}
-            >
-              Dark
-            </button>
-          </div>
+          >
+            Dark Map
+          </button>
         </div>
       </div>
 
       {/* Map Canvas */}
-      <div className="relative flex-1 w-full rounded-lg overflow-hidden border border-slate-800">
+      <div className="relative flex-1 w-full rounded-2xl overflow-hidden border border-white/10 shadow-inner min-h-[340px]">
         <div ref={mapContainerRef} className="w-full h-full z-0"></div>
       </div>
+    </div>
+  );
+
+  if (hideHeader) return mapCanvas;
+
+  return (
+    <div className="bento-card p-4 relative h-[360px] sm:h-[460px] flex flex-col overflow-hidden">
+      {mapCanvas}
     </div>
   );
 }

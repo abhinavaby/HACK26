@@ -1,5 +1,5 @@
 import React from 'react';
-import { Sliders, Trees, Home, Shield, DollarSign, Sparkles } from 'lucide-react';
+import { Sliders, Trees, Home, Shield, IndianRupee, ChevronDown } from 'lucide-react';
 
 export default function MitigationSandbox({
   zones,
@@ -17,73 +17,78 @@ export default function MitigationSandbox({
   const hotspotZones = zones ? [...zones].sort((a, b) => b.lst - a.lst).slice(0, 20) : [];
 
   return (
-    <div className="glass-card p-4 sm:p-5 flex flex-col justify-between space-y-4">
+    <div className="bento-card p-5 flex flex-col justify-between space-y-4">
       <div>
-        {/* Sandbox Title */}
-        <div className="flex items-center justify-between pb-2.5 mb-3 border-b border-slate-800">
+        {/* Sandbox Header */}
+        <div className="flex items-center justify-between pb-3 mb-4 border-b border-white/10">
           <div className="flex items-center gap-2">
-            <Sliders className="w-4 h-4 text-emerald-400" />
-            <h3 className="text-sm sm:text-base font-bold text-white">Mitigation Sandbox</h3>
+            <div className="p-1.5 rounded-lg bg-[#b5f639]/10 text-[#b5f639]">
+              <Sliders className="w-4 h-4" />
+            </div>
+            <h3 className="text-base font-extrabold text-white tracking-tight">Mitigation Sandbox</h3>
           </div>
-          <span className="text-[10px] text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded font-semibold">
-            Live AI Physics
+          <span className="text-[10px] text-[#07080b] bg-[#b5f639] font-black px-2.5 py-0.5 rounded-full shadow">
+            Live Physics Engine
           </span>
         </div>
 
-        {/* Quick Scenario Preset Chips */}
-        <div className="mb-4">
-          <label className="block text-[11px] font-semibold text-slate-400 mb-1.5">
-            ⚡ Quick Policy Actions:
+        {/* Custom Modern Select Dropdown for Target Zone */}
+        <div className="mb-5">
+          <label className="block text-xs font-bold text-slate-300 mb-1.5">
+            Target Zone:
           </label>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
+          <div className="relative">
+            <select
+              value={selectedZoneId}
+              onChange={(e) => onSelectZone(e.target.value)}
+              className="w-full appearance-none bg-[#07080b] border border-white/10 text-slate-100 font-bold text-xs rounded-xl py-3 pl-3 pr-10 focus:border-[#b5f639] focus:outline-none cursor-pointer shadow-inner"
+            >
+              {hotspotZones.map((z) => (
+                <option key={z.zone_id} value={z.zone_id} className="bg-[#0e1117] text-white">
+                  {z.zone_id} ({z.lst}°C Baseline LST)
+                </option>
+              ))}
+            </select>
+            <ChevronDown className="w-4 h-4 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+          </div>
+        </div>
+
+        {/* Quick Action Presets */}
+        <div className="mb-5">
+          <label className="block text-xs font-bold text-slate-300 mb-2">
+            Quick Preset Interventions:
+          </label>
+          <div className="grid grid-cols-3 gap-2">
             <button
               onClick={() => onApplyScenario({ delta_ndvi: 0.25, delta_albedo: 0.10, delta_ndbi: -0.10 })}
-              className="px-2 py-1 bg-slate-900 hover:bg-emerald-900/40 text-slate-300 hover:text-emerald-300 border border-slate-800 rounded text-[11px] font-medium transition cursor-pointer text-center truncate"
+              className="px-2.5 py-2 bg-[#07080b] hover:bg-[#b5f639] text-slate-200 hover:text-[#07080b] border border-white/10 rounded-xl text-xs font-extrabold transition-all cursor-pointer text-center truncate shadow"
             >
               🌲 Max Trees
             </button>
             <button
               onClick={() => onApplyScenario({ delta_ndvi: 0.05, delta_albedo: 0.35, delta_ndbi: -0.05 })}
-              className="px-2 py-1 bg-slate-900 hover:bg-sky-900/40 text-slate-300 hover:text-sky-300 border border-slate-800 rounded text-[11px] font-medium transition cursor-pointer text-center truncate"
+              className="px-2.5 py-2 bg-[#07080b] hover:bg-[#b5f639] text-slate-200 hover:text-[#07080b] border border-white/10 rounded-xl text-xs font-extrabold transition-all cursor-pointer text-center truncate shadow"
             >
               🏠 Cool Roofs
             </button>
             <button
               onClick={() => onApplyScenario({ delta_ndvi: 0.15, delta_albedo: 0.15, delta_ndbi: -0.25 })}
-              className="px-2 py-1 bg-slate-900 hover:bg-amber-900/40 text-slate-300 hover:text-amber-300 border border-slate-800 rounded text-[11px] font-medium transition cursor-pointer text-center truncate col-span-2 sm:col-span-1"
+              className="px-2.5 py-2 bg-[#07080b] hover:bg-[#b5f639] text-slate-200 hover:text-[#07080b] border border-white/10 rounded-xl text-xs font-extrabold transition-all cursor-pointer text-center truncate shadow"
             >
               🧱 De-Paving
             </button>
           </div>
         </div>
 
-        {/* Target Zone Picker */}
-        <div className="mb-4">
-          <label className="block text-[11px] font-semibold text-slate-300 mb-1">
-            🎯 Target Hotspot Zone:
-          </label>
-          <select
-            value={selectedZoneId}
-            onChange={(e) => onSelectZone(e.target.value)}
-            className="w-full bg-slate-900 border border-slate-700 text-slate-200 text-xs rounded-lg p-2 focus:border-emerald-500 focus:outline-none cursor-pointer"
-          >
-            {hotspotZones.map((z) => (
-              <option key={z.zone_id} value={z.zone_id}>
-                {z.zone_id} ({z.lst}°C Surface Temp)
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* Slider 1: Urban Greening */}
-        <div className="mb-4">
-          <div className="flex justify-between items-center mb-1">
-            <label className="text-xs font-semibold text-slate-200 flex items-center gap-1.5">
-              <Trees className="w-3.5 h-3.5 text-emerald-400" />
-              Urban Canopy (Δ NDVI)
+        {/* User-Friendly Slider 1: Tree Canopy */}
+        <div className="mb-5">
+          <div className="flex justify-between items-center mb-1.5">
+            <label className="text-xs font-bold text-slate-200 flex items-center gap-1.5">
+              <Trees className="w-4 h-4 text-[#b5f639]" />
+              Tree Canopy & Greening
             </label>
-            <span className="text-xs font-bold text-emerald-400">
-              +{deltaNdvi.toFixed(2)}
+            <span className="text-xs font-black text-[#b5f639] bg-[#b5f639]/10 px-2.5 py-0.5 rounded-full border border-[#b5f639]/20">
+              +{(deltaNdvi * 100).toFixed(0)}% Cover
             </span>
           </div>
           <input
@@ -93,19 +98,19 @@ export default function MitigationSandbox({
             step="0.05"
             value={deltaNdvi}
             onChange={(e) => onChangeNdvi(parseFloat(e.target.value))}
-            className="w-full cursor-pointer accent-emerald-500 h-2"
+            className="w-full cursor-pointer h-2"
           />
         </div>
 
-        {/* Slider 2: Cool Roofs */}
-        <div className="mb-4">
-          <div className="flex justify-between items-center mb-1">
-            <label className="text-xs font-semibold text-slate-200 flex items-center gap-1.5">
-              <Home className="w-3.5 h-3.5 text-sky-400" />
-              Cool Roof Coating (Δ Albedo)
+        {/* User-Friendly Slider 2: Reflective Roofs */}
+        <div className="mb-5">
+          <div className="flex justify-between items-center mb-1.5">
+            <label className="text-xs font-bold text-slate-200 flex items-center gap-1.5">
+              <Home className="w-4 h-4 text-amber-400" />
+              Reflective Solar Cool Roofs
             </label>
-            <span className="text-xs font-bold text-sky-400">
-              +{deltaAlbedo.toFixed(2)}
+            <span className="text-xs font-black text-amber-400 bg-amber-400/10 px-2.5 py-0.5 rounded-full border border-amber-400/20">
+              +{(deltaAlbedo * 100).toFixed(0)}% Reflectance
             </span>
           </div>
           <input
@@ -115,19 +120,19 @@ export default function MitigationSandbox({
             step="0.05"
             value={deltaAlbedo}
             onChange={(e) => onChangeAlbedo(parseFloat(e.target.value))}
-            className="w-full cursor-pointer accent-sky-500 h-2"
+            className="w-full cursor-pointer h-2"
           />
         </div>
 
-        {/* Slider 3: De-paving */}
-        <div className="mb-4">
-          <div className="flex justify-between items-center mb-1">
-            <label className="text-xs font-semibold text-slate-200 flex items-center gap-1.5">
-              <Shield className="w-3.5 h-3.5 text-amber-400" />
-              Permeable Surfaces (Δ NDBI)
+        {/* User-Friendly Slider 3: Ground De-paving */}
+        <div className="mb-5">
+          <div className="flex justify-between items-center mb-1.5">
+            <label className="text-xs font-bold text-slate-200 flex items-center gap-1.5">
+              <Shield className="w-4 h-4 text-rose-400" />
+              Permeable Ground / De-paving
             </label>
-            <span className="text-xs font-bold text-amber-400">
-              {deltaNdbi.toFixed(2)}
+            <span className="text-xs font-black text-rose-400 bg-rose-400/10 px-2.5 py-0.5 rounded-full border border-rose-400/20">
+              {(deltaNdbi * 100).toFixed(0)}% Asphalt
             </span>
           </div>
           <input
@@ -137,19 +142,19 @@ export default function MitigationSandbox({
             step="0.05"
             value={deltaNdbi}
             onChange={(e) => onChangeNdbi(parseFloat(e.target.value))}
-            className="w-full cursor-pointer accent-amber-500 h-2"
+            className="w-full cursor-pointer h-2"
           />
         </div>
       </div>
 
-      {/* Simplified Budget Summary Box */}
-      <div className="bg-slate-900/90 p-3 rounded-lg border border-slate-800 text-xs">
-        <div className="flex justify-between items-center text-slate-300 font-semibold mb-1">
-          <span className="flex items-center gap-1">
-            <DollarSign className="w-3.5 h-3.5 text-emerald-400" /> Estimated Budget:
+      {/* Clean Capital Budget Summary Box */}
+      <div className="bg-[#07080b]/90 p-3.5 rounded-2xl border border-white/10 text-xs shadow-inner">
+        <div className="flex justify-between items-center text-slate-300 font-bold">
+          <span className="flex items-center gap-1.5 text-slate-300">
+            <IndianRupee className="w-4 h-4 text-[#b5f639]" /> Capital Expenditure Budget:
           </span>
-          <span className="text-emerald-400 font-bold">
-            ${(costBreakdown?.total_usd || 0).toLocaleString()}
+          <span className="text-[#b5f639] font-black text-base">
+            ₹{(costBreakdown?.total_inr || costBreakdown?.total_usd || 0).toLocaleString('en-IN')}
           </span>
         </div>
       </div>

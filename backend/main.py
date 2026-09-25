@@ -166,9 +166,12 @@ def ai_climate_copilot(req: AIChatRequest):
     try:
         client = OpenAI(api_key=api_key)
         system_prompt = (
-            "You are an expert AI Urban Climate Policy Specialist & Thermal Dynamics Engineer. "
+            "You are an expert AI Urban Climate Policy Specialist & Thermal Dynamics Engineer for ThermaGrid. "
             "Help city planners optimize urban heat mitigation using satellite indices (NDVI vegetation, NDBI built-up, albedo rooftop reflectance, LST surface temperature). "
-            "Give concise, actionable, professional recommendations with budget estimates."
+            "Give concise, actionable, highly structured, professional recommendations with budget estimates in Indian Rupees (₹). "
+            "IMPORTANT FORMATTING RULE: Do NOT use raw LaTeX math tags (like \\[, \\], \\text{}, \\times, \\approx). "
+            "Instead, write all formulas and calculations using clean, simple plain-text arithmetic (e.g., 'Expected Benefits = 0.13 × ₹1,064,625 = ₹138,361.25'). "
+            "Use clear bold headers, bullet points, and clean line spacing."
         )
 
         user_content = (
@@ -208,14 +211,14 @@ def generate_ai_policy_brief(sim_data: Dict[str, Any]):
     api_key = os.getenv("OPENAI_API_KEY")
     zone_id = sim_data.get("zone_id", "Zone")
     drop = sim_data.get("temp_reduction_degC", 1.5)
-    cost = sim_data.get("cost_breakdown", {}).get("total_usd", 25000)
+    cost = sim_data.get("cost_breakdown", {}).get("total_inr", sim_data.get("cost_breakdown", {}).get("total_usd", 2075000))
 
     if not api_key or not openai_available:
         return {
             "brief": (
                 f"### Executive Climate Directive: {zone_id}\n"
                 f"1. **Target Objective**: Achieve a projected **{drop}°C Land Surface Temperature reduction**.\n"
-                f"2. **Budget Allocation**: Total estimated capital expenditure of **${cost:,.0f}**.\n"
+                f"2. **Budget Allocation**: Total estimated capital expenditure of **₹{cost:,.0f}**.\n"
                 f"3. **Key Mandate**: Prioritize high-albedo solar reflective roofs (+0.20 albedo) and corridor tree planting.\n"
                 f"\n*(Tip: Add your `OPENAI_API_KEY` to generate real-time GPT-4o customized executive directives!)*"
             ),
@@ -230,15 +233,15 @@ def generate_ai_policy_brief(sim_data: Dict[str, Any]):
             f"- Baseline Temp: {sim_data.get('baseline_lst')}°C\n"
             f"- Simulated Post-Intervention Temp: {sim_data.get('simulated_lst')}°C\n"
             f"- Expected Cooling Drop: {drop}°C\n"
-            f"- Total Investment: ${cost:,.0f}\n"
+            f"- Total Investment: ₹{cost:,.0f} (INR)\n"
             f"- SHAP Drivers: {sim_data.get('shap_attribution')}\n"
-            "Format with Markdown headers: Executive Summary, Intervention Mandates, and ROI Justification."
+            "Format with Markdown headers: Executive Summary, Intervention Mandates, and ROI Justification. Express monetary values in Indian Rupees (₹)."
         )
 
         completion = client.chat.completions.create(
             model="gpt-4o-mini",
             messages=[
-                {"role": "system", "content": "You are a senior urban climate policy advisor."},
+                {"role": "system", "content": "You are a senior urban climate policy advisor in India."},
                 {"role": "user", "content": prompt}
             ],
             max_tokens=400

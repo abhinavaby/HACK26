@@ -117,13 +117,15 @@ class UrbanHeatModelEngine:
         pred_sim_lst = float(self.model.predict(input_sim)[0])
         temp_delta = pred_sim_lst - pred_orig_lst
 
-        # Financial & Physical Heuristics
-        cost_greening = delta_ndvi * 85000
-        cost_cool_roofs = delta_albedo * 35000
-        cost_depaving = abs(delta_ndbi) * 50000
+        # Financial & Physical Heuristics in Indian Rupees (INR ₹)
+        USD_TO_INR = 83.5
+        cost_greening = delta_ndvi * 85000 * USD_TO_INR
+        cost_cool_roofs = delta_albedo * 35000 * USD_TO_INR
+        cost_depaving = abs(delta_ndbi) * 50000 * USD_TO_INR
         total_estimated_cost = float(cost_greening + cost_cool_roofs + cost_depaving)
 
-        roi_metric = abs(temp_delta) / (total_estimated_cost / 10000.0 + 1e-5)
+        # ROI metric: °C cooling drop per ₹1 Lakh (100,000 INR) invested
+        roi_metric = abs(temp_delta) / (total_estimated_cost / 100000.0 + 1e-5)
 
         # SHAP calculation for baseline instance
         shap_vals = self.explainer(input_orig)
@@ -162,6 +164,7 @@ class UrbanHeatModelEngine:
                 "urban_greening": round(cost_greening, 2),
                 "cool_roofs": round(cost_cool_roofs, 2),
                 "depaving": round(cost_depaving, 2),
+                "total_inr": round(total_estimated_cost, 2),
                 "total_usd": round(total_estimated_cost, 2)
             },
             "roi_efficiency": round(roi_metric, 2),

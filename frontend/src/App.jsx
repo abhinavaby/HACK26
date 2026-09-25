@@ -7,6 +7,7 @@ import ShapAttribution from './components/ShapAttribution';
 import RoiRanking from './components/RoiRanking';
 import PolicyReportModal from './components/PolicyReportModal';
 import AiCopilotDrawer from './components/AiCopilotDrawer';
+import LoadingScreen from './components/LoadingScreen';
 import { Map, Cpu, Award } from 'lucide-react';
 
 const API_BASE_URL = 'http://localhost:8000/api';
@@ -23,6 +24,9 @@ export default function App() {
   const [zones, setZones] = useState([]);
   const [selectedZoneId, setSelectedZoneId] = useState('Zone_0313');
 
+  // App Splash / Loading State
+  const [isLoading, setIsLoading] = useState(true);
+
   // Mitigation Sandbox Sliders
   const [deltaNdvi, setDeltaNdvi] = useState(0.15);
   const [deltaAlbedo, setDeltaAlbedo] = useState(0.20);
@@ -33,6 +37,12 @@ export default function App() {
   const [roiRankings, setRoiRankings] = useState([]);
   const [activeTab, setActiveTab] = useState('map'); // 'map' | 'explain' | 'roi'
   const [isReportOpen, setIsReportOpen] = useState(false);
+
+  // Handle City Change
+  const handleCityChange = (newCity) => {
+    setSelectedCity(newCity);
+    setIsLoading(true);
+  };
 
   // Fetch City Spatial Grid
   useEffect(() => {
@@ -87,12 +97,20 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0b0f19] text-slate-100 p-3 sm:p-5 max-w-[1500px] mx-auto">
-      {/* Mobile-Friendly Header */}
+    <div className="min-h-screen bg-[#07080b] text-slate-100 p-2.5 sm:p-5 max-w-7xl mx-auto selection:bg-[#b5f639]/30 selection:text-[#b5f639] relative overflow-x-hidden">
+      {/* High-Tech Loading Screen Overlay */}
+      {isLoading && (
+        <LoadingScreen
+          cityName={cities.find((c) => c.key === selectedCity)?.name || selectedCity}
+          onFinish={() => setIsLoading(false)}
+        />
+      )}
+
+      {/* Mobile-Friendly Floating Header */}
       <Header
         cities={cities}
         selectedCity={selectedCity}
-        onCityChange={setSelectedCity}
+        onCityChange={handleCityChange}
         onOpenReport={() => setIsReportOpen(true)}
       />
 
@@ -102,10 +120,10 @@ export default function App() {
         selectedZoneId={selectedZoneId}
       />
 
-      {/* Main Grid: Left Sandbox Controls | Right Workspace Tabs */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
+      {/* Main Grid: Perfectly Aligned Left Sandbox | Right Workspace */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch mb-8">
         {/* Left Sandbox Column (lg: 5 cols) */}
-        <div className="lg:col-span-5 h-full">
+        <div className="lg:col-span-5 flex flex-col">
           <MitigationSandbox
             zones={zones}
             selectedZoneId={selectedZoneId}
@@ -121,73 +139,88 @@ export default function App() {
           />
         </div>
 
-        {/* Right Workspace Tab Column (lg: 7 cols) */}
-        <div className="lg:col-span-7 flex flex-col gap-3">
-          {/* Tab Navigation */}
-          <div className="flex items-center gap-1.5 bg-slate-900/90 p-1 rounded-xl border border-slate-800">
-            <button
-              onClick={() => setActiveTab('map')}
-              className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-2 rounded-lg text-xs font-bold transition cursor-pointer ${
-                activeTab === 'map'
-                  ? 'bg-emerald-600 text-white shadow-md shadow-emerald-900/40'
-                  : 'text-slate-400 hover:text-white hover:bg-slate-800'
-              }`}
-            >
-              <Map className="w-3.5 h-3.5" />
-              <span>🗺️ Heat Map</span>
-            </button>
+        {/* Right Workspace Column (lg: 7 cols) */}
+        <div className="lg:col-span-7 flex flex-col">
+          <div className="bento-card p-5 flex-1 flex flex-col justify-between">
+            {/* Integrated Header Bar with Workspace Switcher */}
+            <div className="flex flex-wrap items-center justify-between gap-2 pb-3 mb-4 border-b border-white/10">
+              <div className="flex items-center gap-2">
+                <div className="p-1.5 rounded-lg bg-[#b5f639]/10 text-[#b5f639]">
+                  {activeTab === 'map' && <Map className="w-4 h-4" />}
+                  {activeTab === 'explain' && <Cpu className="w-4 h-4" />}
+                  {activeTab === 'roi' && <Award className="w-4 h-4" />}
+                </div>
+                <h3 className="text-base font-extrabold text-white tracking-tight">
+                  {activeTab === 'map' && 'Urban Spatial Heat Map'}
+                  {activeTab === 'explain' && 'Thermal Driver Attribution (SHAP)'}
+                  {activeTab === 'roi' && 'Priority Candidate Hotspots'}
+                </h3>
+              </div>
 
-            <button
-              onClick={() => setActiveTab('explain')}
-              className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-2 rounded-lg text-xs font-bold transition cursor-pointer ${
-                activeTab === 'explain'
-                  ? 'bg-sky-600 text-white shadow-md shadow-sky-900/40'
-                  : 'text-slate-400 hover:text-white hover:bg-slate-800'
-              }`}
-            >
-              <Cpu className="w-3.5 h-3.5" />
-              <span>🔬 Driver XAI</span>
-            </button>
+              {/* Workspace Pill Switcher */}
+              <div className="flex items-center bg-[#07080b] p-1 rounded-full border border-white/10 text-xs">
+                <button
+                  onClick={() => setActiveTab('map')}
+                  className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold transition cursor-pointer ${
+                    activeTab === 'map' ? 'bg-[#b5f639] text-[#07080b] shadow' : 'text-slate-400 hover:text-white'
+                  }`}
+                >
+                  <Map className="w-3.5 h-3.5" />
+                  <span>Heat Map</span>
+                </button>
 
-            <button
-              onClick={() => setActiveTab('roi')}
-              className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-2 rounded-lg text-xs font-bold transition cursor-pointer ${
-                activeTab === 'roi'
-                  ? 'bg-amber-600 text-white shadow-md shadow-amber-900/40'
-                  : 'text-slate-400 hover:text-white hover:bg-slate-800'
-              }`}
-            >
-              <Award className="w-3.5 h-3.5" />
-              <span>📊 Candidates</span>
-            </button>
-          </div>
+                <button
+                  onClick={() => setActiveTab('explain')}
+                  className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold transition cursor-pointer ${
+                    activeTab === 'explain' ? 'bg-[#b5f639] text-[#07080b] shadow' : 'text-slate-400 hover:text-white'
+                  }`}
+                >
+                  <Cpu className="w-3.5 h-3.5" />
+                  <span>Driver XAI</span>
+                </button>
 
-          {/* Tab Content */}
-          <div>
-            {activeTab === 'map' && (
-              <ThermalMap
-                zones={zones}
-                center={cityCenter}
-                selectedZoneId={selectedZoneId}
-                onSelectZone={setSelectedZoneId}
-              />
-            )}
+                <button
+                  onClick={() => setActiveTab('roi')}
+                  className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold transition cursor-pointer ${
+                    activeTab === 'roi' ? 'bg-[#b5f639] text-[#07080b] shadow' : 'text-slate-400 hover:text-white'
+                  }`}
+                >
+                  <Award className="w-3.5 h-3.5" />
+                  <span>Candidates</span>
+                </button>
+              </div>
+            </div>
 
-            {activeTab === 'explain' && (
-              <ShapAttribution
-                shapAttribution={simulationData?.shap_attribution}
-                selectedZoneId={selectedZoneId}
-                baselineLst={simulationData?.baseline_lst}
-              />
-            )}
+            {/* Active Content View */}
+            <div className="flex-1 w-full flex flex-col justify-between">
+              {activeTab === 'map' && (
+                <ThermalMap
+                  zones={zones}
+                  center={cityCenter}
+                  selectedZoneId={selectedZoneId}
+                  onSelectZone={setSelectedZoneId}
+                  hideHeader={true}
+                />
+              )}
 
-            {activeTab === 'roi' && (
-              <RoiRanking
-                rankings={roiRankings}
-                selectedZoneId={selectedZoneId}
-                onSelectZone={setSelectedZoneId}
-              />
-            )}
+              {activeTab === 'explain' && (
+                <ShapAttribution
+                  shapAttribution={simulationData?.shap_attribution}
+                  selectedZoneId={selectedZoneId}
+                  baselineLst={simulationData?.baseline_lst}
+                  hideHeader={true}
+                />
+              )}
+
+              {activeTab === 'roi' && (
+                <RoiRanking
+                  rankings={roiRankings}
+                  selectedZoneId={selectedZoneId}
+                  onSelectZone={setSelectedZoneId}
+                  hideHeader={true}
+                />
+              )}
+            </div>
           </div>
         </div>
       </div>
