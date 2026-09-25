@@ -166,12 +166,29 @@ input[type=range]::-webkit-slider-thumb:hover {
   }
 }
 
+@keyframes headerSlideDown {
+  0% {
+    opacity: 0;
+    transform: translateY(-24px);
+    filter: blur(6px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0px);
+  }
+}
+
 .animate-fade-in {
   animation: fadeInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .animate-page-transition {
   animation: pageTransitionIn 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-header-in {
+  animation: headerSlideDown 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .tab-btn-active {

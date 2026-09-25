@@ -116,14 +116,16 @@ export default function App() {
       )}
 
       {/* Mobile-Friendly Floating Header with Page Switcher */}
-      <Header
-        cities={cities}
-        selectedCity={selectedCity}
-        onCityChange={handleCityChange}
-        onOpenReport={() => setIsReportOpen(true)}
-        pageView={pageView}
-        onNavigatePage={setPageView}
-      />
+      {!isLoading && (
+        <Header
+          cities={cities}
+          selectedCity={selectedCity}
+          onCityChange={handleCityChange}
+          onOpenReport={() => setIsReportOpen(true)}
+          pageView={pageView}
+          onNavigatePage={setPageView}
+        />
+      )}
 
       {/* Page View 1: Home Page with Smooth Transition */}
       {pageView === 'home' ? (

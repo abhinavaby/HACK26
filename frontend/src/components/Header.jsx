@@ -10,7 +10,7 @@ export default function Header({
   onNavigatePage
 }) {
   return (
-    <header className="sticky top-0 z-50 w-full max-w-6xl mx-auto px-4 pt-2">
+    <header className="sticky top-0 z-50 w-full max-w-6xl mx-auto px-4 pt-2 animate-header-in">
       {/* Circular Inverted Floating Dark Top Bar / Notch Header */}
       <div className="bg-[#000000] text-white px-6 py-3 rounded-b-[1.75rem] shadow-[0_20px_50px_rgba(0,0,0,0.8)] border border-white/10 flex items-center justify-between gap-4 transition-all duration-300">
 

@@ -49,7 +49,7 @@ export default function LoadingScreen({ cityName = 'Delhi NCR', onFinish }) {
 
   return (
     <div
-      className={`fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#07080b] text-white p-4 select-none transition-opacity duration-400 ease-in-out ${
+      className={`fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-[#07080b] text-white p-4 select-none transition-opacity duration-400 ease-in-out ${
         isFadingOut ? 'opacity-0 pointer-events-none' : 'opacity-100'
       }`}
     >

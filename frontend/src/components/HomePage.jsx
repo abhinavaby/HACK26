@@ -66,55 +66,6 @@ export default function HomePage({
             </div>
           </div>
 
-          {/* CIRCULAR METRICS & REAL-TIME ERA5 / CPCB TELEMETRY CARDS */}
-          <div className="relative z-10 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 max-w-5xl mx-auto w-full pt-2">
-            
-            {/* Stat Card 1: Baseline LST */}
-            <div className="bg-white/80 backdrop-blur-md p-3.5 rounded-3xl border border-[#84cc16]/20 shadow-sm flex flex-col justify-between items-center text-center transition-all duration-300 hover:scale-[1.02] hover:border-[#84cc16]/40">
-              <span className="text-[9.5px] font-bold text-slate-500 uppercase tracking-wider">Baseline LST</span>
-              <span className="text-xl sm:text-2xl font-bold text-[#0d1117] my-0.5">39.7°C</span>
-              <span className="text-[9px] text-rose-600 font-medium">Surface Skin Temp</span>
-            </div>
-
-            {/* Stat Card 2: Air Temp (ERA5) */}
-            <div className="bg-white/80 backdrop-blur-md p-3.5 rounded-3xl border border-[#84cc16]/20 shadow-sm flex flex-col justify-between items-center text-center transition-all duration-300 hover:scale-[1.02] hover:border-[#84cc16]/40">
-              <span className="text-[9.5px] font-bold text-amber-700 uppercase tracking-wider">Air Temp</span>
-              <span className="text-xl sm:text-2xl font-bold text-amber-600 my-0.5">34.2°C</span>
-              <span className="text-[9px] text-slate-500 font-medium">ERA5 Reanalysis</span>
-            </div>
-
-            {/* Stat Card 3: Humidity (CPCB) */}
-            <div className="bg-white/80 backdrop-blur-md p-3.5 rounded-3xl border border-[#84cc16]/20 shadow-sm flex flex-col justify-between items-center text-center transition-all duration-300 hover:scale-[1.02] hover:border-[#84cc16]/40">
-              <span className="text-[9.5px] font-bold text-cyan-700 uppercase tracking-wider">Humidity</span>
-              <span className="text-xl sm:text-2xl font-bold text-cyan-600 my-0.5">42.5%</span>
-              <span className="text-[9px] text-slate-500 font-medium">CPCB Telemetry</span>
-            </div>
-
-            {/* Stat Card 4: Wind Speed (ERA5) */}
-            <div className="bg-white/80 backdrop-blur-md p-3.5 rounded-3xl border border-[#84cc16]/20 shadow-sm flex flex-col justify-between items-center text-center transition-all duration-300 hover:scale-[1.02] hover:border-[#84cc16]/40">
-              <span className="text-[9.5px] font-bold text-emerald-700 uppercase tracking-wider">Wind Speed</span>
-              <span className="text-xl sm:text-2xl font-bold text-emerald-600 my-0.5">2.8 m/s</span>
-              <span className="text-[9px] text-slate-500 font-medium">ERA5 Surface Grid</span>
-            </div>
-
-            {/* Stat Card 5: Target LST Drop */}
-            <div className="bg-[#0d1117] text-white p-3.5 rounded-3xl border border-white/10 shadow-xl flex flex-col justify-between items-center text-center transition-all duration-300 hover:scale-[1.02] hover:border-[#a3e635]/40">
-              <span className="text-[9.5px] font-bold text-[#a3e635] uppercase tracking-wider">Target LST</span>
-              <span className="text-xl sm:text-2xl font-bold text-[#a3e635] my-0.5">
-                ↓ 2.68°C
-              </span>
-              <span className="text-[9px] text-slate-400 font-medium">Simulated Cooling</span>
-            </div>
-
-            {/* Stat Card 6: Feasibility */}
-            <div className="bg-white/80 backdrop-blur-md p-3.5 rounded-3xl border border-[#84cc16]/20 shadow-sm flex flex-col justify-between items-center text-center transition-all duration-300 hover:scale-[1.02] hover:border-[#84cc16]/40">
-              <span className="text-[9.5px] font-bold text-slate-500 uppercase tracking-wider">Feasibility</span>
-              <span className="text-xl sm:text-2xl font-bold text-[#65a30d] my-0.5">100%</span>
-              <span className="text-[9px] text-slate-500 font-medium">Water & Budget</span>
-            </div>
-
-          </div>
-
         </div>
       </div>
     </div>
