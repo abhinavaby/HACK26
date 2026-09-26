@@ -223,12 +223,55 @@ def get_preset_scenarios():
 # OpenAI API Integration Endpoints
 # ==============================================================================
 
+DOMAIN_KEYWORDS = [
+    "thermagrid", "heat", "temperature", "lst", "ndvi", "ndbi", "albedo", "roof", "cool",
+    "tree", "canopy", "vegetation", "pave", "depav", "water", "budget", "zone", "city",
+    "delhi", "ahmedabad", "phoenix", "tokyo", "urban", "climate", "hotspot", "shap",
+    "mitigation", "era5", "cpcb", "wind", "humidity", "green", "corridor", "intervention",
+    "roi", "surface", "microclimate", "satellite", "landsat", "sentinel", "gis", "spatial",
+    "cost", "rupee", "inr", "policy", "simulat", "grid", "air", "temp", "warm", "drop",
+    "bldg", "building", "density", "vector", "app", "website", "system", "data", "report",
+    "region", "area", "impact", "suitability", "ranking", "how", "what", "why", "which", "where"
+]
+
+OFF_TOPIC_REJECTION_MSG = (
+    "I am ThermaGrid's Urban AI Climate Assistant. "
+    "I can only answer questions related to ThermaGrid, urban heat island mitigation, satellite thermal mapping (LST, NDVI, NDBI, Albedo), microclimate physics, and city cooling interventions. "
+    "Please ask a question related to this website."
+)
+
 @app.post("/api/ai-chat")
 def ai_climate_copilot(req: AIChatRequest):
     """
     OpenAI API Integration Method 1 & 2:
-    Interactive AI Climate Copilot answering urban heat questions with context.
+    Interactive AI Climate Copilot answering urban heat questions with website context.
+    Prioritizes ThermaGrid domain terminology and rejects off-topic queries.
     """
+    query_lower = req.user_query.strip().lower()
+    
+    # 1. Check for obvious off-topic triggers
+    off_topic_triggers = [
+        "joke", "recipe", "who won", "president", "movie", "song", "capital of",
+        "code for fibonacci", "python code for", "write a story", "cooking", "football",
+        "cricket", "basketball", "general news", "math quiz"
+    ]
+    if any(trigger in query_lower for trigger in off_topic_triggers):
+        return {
+            "query": req.user_query,
+            "response": OFF_TOPIC_REJECTION_MSG,
+            "source": "domain_filter"
+        }
+
+    # 2. Check for domain relevance keywords
+    is_relevant = any(kw in query_lower for kw in DOMAIN_KEYWORDS)
+    if not is_relevant and len(query_lower.split()) > 3:
+        # Strictly reject long queries that have zero connection to ThermaGrid
+        return {
+            "query": req.user_query,
+            "response": OFF_TOPIC_REJECTION_MSG,
+            "source": "strict_relevance_check"
+        }
+
     api_key = os.getenv("OPENAI_API_KEY")
 
     if not api_key or not openai_available:
@@ -236,7 +279,7 @@ def ai_climate_copilot(req: AIChatRequest):
         return {
             "query": req.user_query,
             "response": (
-                f"🤖 [Urban AI Copilot - Rule Engine Context]\n\n"
+                f"🤖 [Urban AI Copilot - ThermaGrid Engine Context]\n\n"
                 f"Regarding your query on '{req.user_query}' in {req.city}:\n"
                 f"- For zone {req.selected_zone_id or 'hotspot'}, increasing roof albedo by +0.25 yields immediate ~1.2°C cooling per hectare.\n"
                 f"- Greening canopy (NDVI +0.20) provides long-term evapotranspirative cooling of up to 2.1°C.\n\n"
@@ -248,19 +291,25 @@ def ai_climate_copilot(req: AIChatRequest):
     try:
         client = OpenAI(api_key=api_key)
         system_prompt = (
-            "You are an expert AI Urban Climate Policy Specialist & Thermal Dynamics Engineer for ThermaGrid. "
-            "Help city planners optimize urban heat mitigation using satellite indices (NDVI vegetation, NDBI built-up, albedo rooftop reflectance, LST surface temperature). "
+            "You are ThermaGrid's dedicated AI Urban Climate Policy Specialist & Thermal Dynamics Assistant. "
+            "PRECEDENCE RULE: Give highest priority and precedence to terms, concepts, and live data from the ThermaGrid website "
+            "(Land Surface Temperature LST, vegetation NDVI, built-up NDBI, rooftop albedo, building density, surface wind speed, ERA5/CPCB telemetry, SHAP explainability, ROI rankings, and municipal budget/water constraints in ₹ INR). "
+            "IN-DOMAIN ASSIGNMENT: All questions about why a zone/region/city is hot, thermal drivers, SHAP explainability, temperature, cooling interventions (tree canopy, cool roofs, de-paving), ROI, budget, water, weather telemetry, or ThermaGrid metrics ARE IN-DOMAIN QUESTIONS. "
+            "When answering, ALWAYS ground your response in the provided Selected Zone ID and Simulation Data Context. "
+            "IF a question is completely unrelated to ThermaGrid or urban heat island mitigation (e.g., cooking recipes, pop culture, sports, general programming), REJECT IT with: "
+            "\"I am ThermaGrid's Urban AI Climate Assistant. I can only answer questions related to ThermaGrid, urban heat island mitigation, satellite thermal mapping (LST, NDVI, NDBI, Albedo), microclimate physics, and city cooling interventions. Please ask a question related to this website.\"\n"
             "Give concise, actionable, highly structured, professional recommendations with budget estimates in Indian Rupees (₹). "
             "IMPORTANT FORMATTING RULE: Do NOT use raw LaTeX math tags (like \\[, \\], \\text{}, \\times, \\approx). "
-            "Instead, write all formulas and calculations using clean, simple plain-text arithmetic (e.g., 'Expected Benefits = 0.13 × ₹1,064,625 = ₹138,361.25'). "
+            "Write all formulas using clean, simple plain-text arithmetic (e.g., 'Expected Benefits = 0.13 × ₹1,064,625 = ₹138,361.25'). "
             "Use clear bold headers, bullet points, and clean line spacing."
         )
 
         user_content = (
-            f"City Context: {req.city}\n"
-            f"Selected Zone: {req.selected_zone_id or 'General'}\n"
-            f"Simulation Data Context: {req.simulation_context or 'N/A'}\n\n"
-            f"User Query: {req.user_query}"
+            f"ThermaGrid Website Context:\n"
+            f"- Active City: {req.city}\n"
+            f"- Selected Zone ID: {req.selected_zone_id or 'General Hotspot'}\n"
+            f"- Live Simulation Data: {req.simulation_context or 'N/A'}\n\n"
+            f"User Question: {req.user_query}"
         )
 
         completion = client.chat.completions.create(
@@ -269,8 +318,8 @@ def ai_climate_copilot(req: AIChatRequest):
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_content}
             ],
-            temperature=0.7,
-            max_tokens=350
+            temperature=0.4,
+            max_tokens=380
         )
 
         reply = completion.choices[0].message.content

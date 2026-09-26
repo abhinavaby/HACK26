@@ -154,10 +154,28 @@ export default function ThermalMap({
       const bldgDensity = zone.bldg_density ?? 0.70;
       const openSpaceM2 = Math.round((1.0 - bldgDensity) * 10000);
 
-      // Modelled impact drop calculation for this tile
+      // Zone-specific physics-informed cooling impact calculation
       const baselineLst = zone.lst;
-      const coolingDrop = (0.6 + (deltaNdvi * 3.8) + (deltaAlbedo * 3.2) + (Math.abs(deltaNdbi) * 2.2)).toFixed(1);
-      const simulatedLst = (baselineLst - parseFloat(coolingDrop)).toFixed(1);
+      const ndvi = zone.ndvi ?? 0.20;
+      const albedo = zone.albedo ?? 0.15;
+      const windSpeed = zone.wind_speed_ms ?? zone.wind_speed ?? 2.8;
+
+      // Greening drop varies with unbuilt space ratio and vegetation deficiency
+      const greeningDrop = deltaNdvi * 4.2 * (1.1 - 0.5 * ndvi) * (1.0 - 0.3 * bldgDensity);
+
+      // Cool Roof drop varies with building density and roof albedo
+      const coolRoofDrop = deltaAlbedo * 3.8 * (0.4 + 0.8 * bldgDensity) * (0.55 - albedo);
+
+      // De-paving drop varies with imperviousness and wind speed
+      const depavingDrop = Math.abs(deltaNdbi) * 2.5 * (0.7 + 0.1 * windSpeed);
+
+      // Thermal amplification scaling based on zone's baseline LST severity
+      const thermalScale = Math.pow(Math.max(20.0, baselineLst) / 33.0, 1.15);
+
+      // Total zone-specific cooling drop
+      const zoneCoolingDropVal = Math.max(0.3, (greeningDrop + coolRoofDrop + depavingDrop) * thermalScale);
+      const coolingDrop = zoneCoolingDropVal.toFixed(1);
+      const simulatedLst = Math.max(15.0, baselineLst - zoneCoolingDropVal).toFixed(1);
 
       // Constraints check
       const requiredWater = Math.round((deltaNdvi * 100) * 120);
