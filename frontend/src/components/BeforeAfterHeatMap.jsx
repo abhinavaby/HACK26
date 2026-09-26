@@ -92,70 +92,129 @@ export default function BeforeAfterHeatMap({
   // Initialize Side-by-Side Maps
   useEffect(() => {
     if (viewMode !== 'side_by_side') return;
+    if (!mapLeftRef.current || !mapRightRef.current) return;
+
+    // Safely cleanup old map instances if present
+    if (instanceLeftRef.current) {
+      try { instanceLeftRef.current.remove(); } catch (e) {}
+      instanceLeftRef.current = null;
+    }
+    if (instanceRightRef.current) {
+      try { instanceRightRef.current.remove(); } catch (e) {}
+      instanceRightRef.current = null;
+    }
 
     // Initialize Left Map (Before)
-    if (mapLeftRef.current && !instanceLeftRef.current) {
-      const mapL = L.map(mapLeftRef.current, {
-        center: [center.lat, center.lon],
-        zoom: 13,
-        zoomControl: true,
-        attributionControl: false
-      });
-      tileLeftRef.current = L.tileLayer(getTileUrl(mapStyle), { maxZoom: 19 }).addTo(mapL);
-      layerGroupLeftRef.current = L.layerGroup().addTo(mapL);
-      instanceLeftRef.current = mapL;
-    } else if (instanceLeftRef.current) {
-      instanceLeftRef.current.setView([center.lat, center.lon], 13);
-    }
+    const mapL = L.map(mapLeftRef.current, {
+      center: [center.lat, center.lon],
+      zoom: 13,
+      zoomControl: false,
+      attributionControl: false
+    });
+    L.control.zoom({ position: 'topright' }).addTo(mapL);
+    tileLeftRef.current = L.tileLayer(getTileUrl(mapStyle), { maxZoom: 19 }).addTo(mapL);
+    layerGroupLeftRef.current = L.layerGroup().addTo(mapL);
+    instanceLeftRef.current = mapL;
 
     // Initialize Right Map (After)
-    if (mapRightRef.current && !instanceRightRef.current) {
-      const mapR = L.map(mapRightRef.current, {
-        center: [center.lat, center.lon],
-        zoom: 13,
-        zoomControl: true,
-        attributionControl: false
+    const mapR = L.map(mapRightRef.current, {
+      center: [center.lat, center.lon],
+      zoom: 13,
+      zoomControl: false,
+      attributionControl: false
+    });
+    L.control.zoom({ position: 'topright' }).addTo(mapR);
+    tileRightRef.current = L.tileLayer(getTileUrl(mapStyle), { maxZoom: 19 }).addTo(mapR);
+    layerGroupRightRef.current = L.layerGroup().addTo(mapR);
+    instanceRightRef.current = mapR;
+
+    // Direct synchronization handlers
+    let isSyncing = false;
+    const syncLtoR = () => {
+      if (isSyncing) return;
+      isSyncing = true;
+      mapR.setView(mapL.getCenter(), mapL.getZoom(), { animate: false });
+      isSyncing = false;
+    };
+    const syncRtoL = () => {
+      if (isSyncing) return;
+      isSyncing = true;
+      mapL.setView(mapR.getCenter(), mapR.getZoom(), { animate: false });
+      isSyncing = false;
+    };
+
+    mapL.on('move', syncLtoR);
+    mapR.on('move', syncRtoL);
+
+    // Timed size invalidation checks for smooth layout calculation
+    const timers = [
+      setTimeout(() => { mapL.invalidateSize(); mapR.invalidateSize(); }, 50),
+      setTimeout(() => { mapL.invalidateSize(); mapR.invalidateSize(); }, 200),
+      setTimeout(() => { mapL.invalidateSize(); mapR.invalidateSize(); }, 500)
+    ];
+
+    // ResizeObserver for responsive layout recalculation
+    let ro = null;
+    if (window.ResizeObserver && mapLeftRef.current) {
+      ro = new ResizeObserver(() => {
+        mapL.invalidateSize();
+        mapR.invalidateSize();
       });
-      tileRightRef.current = L.tileLayer(getTileUrl(mapStyle), { maxZoom: 19 }).addTo(mapR);
-      layerGroupRightRef.current = L.layerGroup().addTo(mapR);
-      instanceRightRef.current = mapR;
-    } else if (instanceRightRef.current) {
-      instanceRightRef.current.setView([center.lat, center.lon], 13);
+      ro.observe(mapLeftRef.current);
     }
 
-    if (instanceLeftRef.current && instanceRightRef.current) {
-      syncMaps(instanceLeftRef.current, instanceRightRef.current);
-      syncMaps(instanceRightRef.current, instanceLeftRef.current);
-    }
-
-    setTimeout(() => {
-      instanceLeftRef.current?.invalidateSize();
-      instanceRightRef.current?.invalidateSize();
-    }, 150);
-  }, [center, viewMode]);
+    return () => {
+      timers.forEach(clearTimeout);
+      if (ro) ro.disconnect();
+      mapL.off('move', syncLtoR);
+      mapR.off('move', syncRtoL);
+      try { mapL.remove(); } catch (e) {}
+      try { mapR.remove(); } catch (e) {}
+      instanceLeftRef.current = null;
+      instanceRightRef.current = null;
+    };
+  }, [center.lat, center.lon, viewMode]);
 
   // Initialize Difference Map
   useEffect(() => {
     if (viewMode !== 'difference') return;
+    if (!mapDiffRef.current) return;
 
-    if (mapDiffRef.current && !instanceDiffRef.current) {
-      const mapD = L.map(mapDiffRef.current, {
-        center: [center.lat, center.lon],
-        zoom: 13,
-        zoomControl: true,
-        attributionControl: false
-      });
-      tileDiffRef.current = L.tileLayer(getTileUrl(mapStyle), { maxZoom: 19 }).addTo(mapD);
-      layerGroupDiffRef.current = L.layerGroup().addTo(mapD);
-      instanceDiffRef.current = mapD;
-    } else if (instanceDiffRef.current) {
-      instanceDiffRef.current.setView([center.lat, center.lon], 13);
+    if (instanceDiffRef.current) {
+      try { instanceDiffRef.current.remove(); } catch (e) {}
+      instanceDiffRef.current = null;
     }
 
-    setTimeout(() => {
-      instanceDiffRef.current?.invalidateSize();
-    }, 150);
-  }, [center, viewMode]);
+    const mapD = L.map(mapDiffRef.current, {
+      center: [center.lat, center.lon],
+      zoom: 13,
+      zoomControl: false,
+      attributionControl: false
+    });
+    L.control.zoom({ position: 'topright' }).addTo(mapD);
+    tileDiffRef.current = L.tileLayer(getTileUrl(mapStyle), { maxZoom: 19 }).addTo(mapD);
+    layerGroupDiffRef.current = L.layerGroup().addTo(mapD);
+    instanceDiffRef.current = mapD;
+
+    const timers = [
+      setTimeout(() => mapD.invalidateSize(), 50),
+      setTimeout(() => mapD.invalidateSize(), 200),
+      setTimeout(() => mapD.invalidateSize(), 500)
+    ];
+
+    let ro = null;
+    if (window.ResizeObserver && mapDiffRef.current) {
+      ro = new ResizeObserver(() => mapD.invalidateSize());
+      ro.observe(mapDiffRef.current);
+    }
+
+    return () => {
+      timers.forEach(clearTimeout);
+      if (ro) ro.disconnect();
+      try { mapD.remove(); } catch (e) {}
+      instanceDiffRef.current = null;
+    };
+  }, [center.lat, center.lon, viewMode]);
 
   // Handle Tile Style changes across maps
   useEffect(() => {
@@ -355,30 +414,30 @@ export default function BeforeAfterHeatMap({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 min-h-[480px]">
           {/* Left Map: BEFORE */}
           <div className="relative rounded-2xl overflow-hidden border border-white/10 bg-[#0e1117] h-[480px]">
-            <div className="absolute top-2 left-2 z-[400] bg-[#07080b]/90 backdrop-blur px-2.5 py-1 rounded-lg border border-rose-500/40 text-xs font-black text-rose-400 flex items-center gap-1.5 shadow">
+            <div className="absolute top-2.5 left-2.5 z-[400] bg-[#07080b]/90 backdrop-blur px-2.5 py-1 rounded-lg border border-rose-500/40 text-xs font-black text-rose-400 flex items-center gap-1.5 shadow-lg pointer-events-none">
               <Flame className="w-3.5 h-3.5 text-rose-500" />
               <span>BEFORE: Current Baseline Heat</span>
             </div>
-            <div ref={mapLeftRef} className="w-full h-full h-[480px] z-0"></div>
+            <div ref={mapLeftRef} className="w-full h-full relative z-0"></div>
           </div>
 
           {/* Right Map: AFTER */}
           <div className="relative rounded-2xl overflow-hidden border border-[#b5f639]/30 bg-[#0e1117] h-[480px]">
-            <div className="absolute top-2 left-2 z-[400] bg-[#07080b]/90 backdrop-blur px-2.5 py-1 rounded-lg border border-[#b5f639]/40 text-xs font-black text-[#b5f639] flex items-center gap-1.5 shadow">
+            <div className="absolute top-2.5 left-2.5 z-[400] bg-[#07080b]/90 backdrop-blur px-2.5 py-1 rounded-lg border border-[#b5f639]/40 text-xs font-black text-[#b5f639] flex items-center gap-1.5 shadow-lg pointer-events-none">
               <CheckCircle2 className="w-3.5 h-3.5 text-[#b5f639]" />
               <span>AFTER: Modelled Post-Intervention Heat</span>
             </div>
-            <div ref={mapRightRef} className="w-full h-full h-[480px] z-0"></div>
+            <div ref={mapRightRef} className="w-full h-full relative z-0"></div>
           </div>
         </div>
       ) : (
         /* Difference Map View */
         <div className="relative rounded-2xl overflow-hidden border border-cyan-500/30 bg-[#0e1117] h-[480px] min-h-[480px]">
-          <div className="absolute top-2 left-2 z-[400] bg-[#07080b]/90 backdrop-blur px-2.5 py-1 rounded-lg border border-cyan-500/40 text-xs font-black text-cyan-300 flex items-center gap-1.5 shadow">
+          <div className="absolute top-2.5 left-2.5 z-[400] bg-[#07080b]/90 backdrop-blur px-2.5 py-1 rounded-lg border border-cyan-500/40 text-xs font-black text-cyan-300 flex items-center gap-1.5 shadow-lg pointer-events-none">
             <Snowflake className="w-3.5 h-3.5 text-cyan-400" />
             <span>COOLING IMPACT: Baseline LST - Modelled LST (Spatial Drop Δ°C)</span>
           </div>
-          <div ref={mapDiffRef} className="w-full h-full h-[480px] z-0"></div>
+          <div ref={mapDiffRef} className="w-full h-full relative z-0"></div>
         </div>
       )}
 

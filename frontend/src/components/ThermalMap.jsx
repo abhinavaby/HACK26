@@ -65,52 +65,51 @@ export default function ThermalMap({
   useEffect(() => {
     if (!mapContainerRef.current) return;
 
-    if (!mapInstanceRef.current) {
-      const map = L.map(mapContainerRef.current, {
-        center: [center.lat, center.lon],
-        zoom: 13,
-        zoomControl: true,
-        attributionControl: false
-      });
-
-      tileLayerRef.current = L.tileLayer(getTileUrl(mapStyle), {
-        maxZoom: 19,
-        attribution: '&copy; Esri Satellite & OpenStreetMap'
-      }).addTo(map);
-
-      // Create separate layer groups
-      hotspotsLayerRef.current = L.layerGroup().addTo(map);
-      treeLayerRef.current = L.layerGroup().addTo(map);
-      coolRoofsLayerRef.current = L.layerGroup().addTo(map);
-      corridorsLayerRef.current = L.layerGroup().addTo(map);
-
-      mapInstanceRef.current = map;
-
-      setTimeout(() => {
-        map.invalidateSize();
-      }, 150);
-    } else {
-      mapInstanceRef.current.setView([center.lat, center.lon], 13);
-      setTimeout(() => {
-        mapInstanceRef.current?.invalidateSize();
-      }, 150);
+    if (mapInstanceRef.current) {
+      try { mapInstanceRef.current.remove(); } catch (e) {}
+      mapInstanceRef.current = null;
     }
-  }, [center]);
 
-  // Window resize & layout check handler to ensure Leaflet renders tiles
-  useEffect(() => {
-    const handleResize = () => {
-      if (mapInstanceRef.current) {
-        mapInstanceRef.current.invalidateSize();
-      }
-    };
-    window.addEventListener('resize', handleResize);
-    const timer = setTimeout(handleResize, 300);
+    const map = L.map(mapContainerRef.current, {
+      center: [center.lat, center.lon],
+      zoom: 13,
+      zoomControl: false,
+      attributionControl: false
+    });
+    L.control.zoom({ position: 'topright' }).addTo(map);
+
+    tileLayerRef.current = L.tileLayer(getTileUrl(mapStyle), {
+      maxZoom: 19,
+      attribution: '&copy; Esri Satellite & OpenStreetMap'
+    }).addTo(map);
+
+    // Create separate layer groups
+    hotspotsLayerRef.current = L.layerGroup().addTo(map);
+    treeLayerRef.current = L.layerGroup().addTo(map);
+    coolRoofsLayerRef.current = L.layerGroup().addTo(map);
+    corridorsLayerRef.current = L.layerGroup().addTo(map);
+
+    mapInstanceRef.current = map;
+
+    const timers = [
+      setTimeout(() => map.invalidateSize(), 50),
+      setTimeout(() => map.invalidateSize(), 200),
+      setTimeout(() => map.invalidateSize(), 500)
+    ];
+
+    let ro = null;
+    if (window.ResizeObserver && mapContainerRef.current) {
+      ro = new ResizeObserver(() => map.invalidateSize());
+      ro.observe(mapContainerRef.current);
+    }
+
     return () => {
-      window.removeEventListener('resize', handleResize);
-      clearTimeout(timer);
+      timers.forEach(clearTimeout);
+      if (ro) ro.disconnect();
+      try { map.remove(); } catch (e) {}
+      mapInstanceRef.current = null;
     };
-  }, []);
+  }, [center.lat, center.lon]);
 
   // Handle tile style change
   useEffect(() => {
@@ -480,7 +479,7 @@ export default function ThermalMap({
 
       {/* Map Canvas */}
       <div className="relative w-full h-[500px] sm:h-[580px] rounded-2xl overflow-hidden border border-white/10 shadow-inner">
-        <div ref={mapContainerRef} className="w-full h-full h-[500px] sm:h-[580px] z-0"></div>
+        <div ref={mapContainerRef} className="w-full h-full relative z-0"></div>
 
         {/* Heat Intensity Legend Overlay */}
         <div className="absolute bottom-3 left-3 z-[400] bg-[#0e1117]/90 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/10 flex items-center gap-2 text-[10px] shadow-lg">
